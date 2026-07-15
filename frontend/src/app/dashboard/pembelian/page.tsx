@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "@/lib/axios";
 
 export default function PembelianPage() {
-  const [purchases, setPurchases] = useState([]);
+  const [purchases, setPurchases] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Data referensi untuk form

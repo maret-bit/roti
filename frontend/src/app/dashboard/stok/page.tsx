@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import axios from "@/lib/axios";
 
 export default function StokPage() {
-  const [products, setProducts] = useState([]);
-  const [history, setHistory] = useState([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("Bahan Baku");
 

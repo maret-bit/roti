@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import axios from "@/lib/axios";
 
 export default function InputPiutangAwalPage() {
-  const [users, setUsers] = useState([]);
-  const [partners, setPartners] = useState([]);
-  const [products, setProducts] = useState([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [partners, setPartners] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitLoading, setSubmitLoading] = useState(false);
 

@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import axios from "@/lib/axios";
 
 export default function HasilProduksiPage() {
-  const [results, setResults] = useState([]);
-  const [transfers, setTransfers] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [salesUsers, setSalesUsers] = useState([]);
+  const [results, setResults] = useState<any[]>([]);
+  const [transfers, setTransfers] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [salesUsers, setSalesUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Form states Production

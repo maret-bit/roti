@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import axios from "@/lib/axios";
 
 export default function DaftarTransaksiPage() {
-  const [transactions, setTransactions] = useState([]);
-  const [partners, setPartners] = useState([]);
-  const [myStock, setMyStock] = useState([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [partners, setPartners] = useState<any[]>([]);
+  const [myStock, setMyStock] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);

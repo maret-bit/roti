@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import axios from "@/lib/axios";
 
 export default function ResepPage() {
-  const [recipes, setRecipes] = useState([]);
-  const [products, setProducts] = useState([]);
+  const [recipes, setRecipes] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Form states

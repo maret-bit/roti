@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import axios from "@/lib/axios";
 
 export default function PengaturanPage() {
-  const [users, setUsers] = useState([]);
-  const [conversions, setConversions] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [units, setUnits] = useState([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [conversions, setConversions] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [units, setUnits] = useState<any[]>([]);
   
   // --- Unit Form ---
   const [unitName, setUnitName] = useState("");

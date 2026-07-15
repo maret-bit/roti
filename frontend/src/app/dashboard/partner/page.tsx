@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "@/lib/axios";
 
 export default function PartnerPage() {
-  const [partners, setPartners] = useState([]);
+  const [partners, setPartners] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [editId, setEditId] = useState<number | null>(null);
   const [showForm, setShowForm] = useState(false);

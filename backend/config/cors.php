@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:3001', 'http://localhost:3000'],
+    'allowed_origins' => ['http://localhost:3001', 'http://localhost:3000', 'https://rotiku.web.id', 'https://www.rotiku.web.id'],
 
     'allowed_origins_patterns' => [],
 

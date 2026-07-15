@@ -8,8 +8,8 @@ export default function PembelianPage() {
   const [loading, setLoading] = useState(true);
 
   // Data referensi untuk form
-  const [products, setProducts] = useState([]);
-  const [units, setUnits] = useState([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [units, setUnits] = useState<any[]>([]);
 
   // Form states
   const [showForm, setShowForm] = useState(false);

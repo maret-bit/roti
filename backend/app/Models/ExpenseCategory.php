@@ -12,5 +12,10 @@ class ExpenseCategory extends Model
     {
         return $this->hasMany(Expense::class);
     }
+
+    public function items()
+    {
+        return $this->hasMany(ExpenseItem::class);
+    }
 }
 

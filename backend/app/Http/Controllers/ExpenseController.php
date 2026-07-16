@@ -9,7 +9,7 @@ class ExpenseController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Expense::with('category')->orderBy('expense_date', 'desc')->orderBy('created_at', 'desc');
+        $query = Expense::with(['category', 'item'])->orderBy('expense_date', 'desc')->orderBy('created_at', 'desc');
         
         if ($request->has('start_date') && $request->has('end_date')) {
             $query->whereBetween('expense_date', [$request->start_date, $request->end_date]);
@@ -26,13 +26,14 @@ class ExpenseController extends Controller
     {
         $validated = $request->validate([
             'expense_category_id' => 'required|exists:expense_categories,id',
+            'expense_item_id' => 'nullable|exists:expense_items,id',
             'amount' => 'required|numeric|min:0',
             'expense_date' => 'required|date',
             'notes' => 'nullable|string',
         ]);
 
         $expense = Expense::create($validated);
-        $expense->load('category');
+        $expense->load(['category', 'item']);
         return response()->json($expense, 201);
     }
 
@@ -40,13 +41,14 @@ class ExpenseController extends Controller
     {
         $validated = $request->validate([
             'expense_category_id' => 'required|exists:expense_categories,id',
+            'expense_item_id' => 'nullable|exists:expense_items,id',
             'amount' => 'required|numeric|min:0',
             'expense_date' => 'required|date',
             'notes' => 'nullable|string',
         ]);
 
         $expense->update($validated);
-        $expense->load('category');
+        $expense->load(['category', 'item']);
         return response()->json($expense);
     }
 

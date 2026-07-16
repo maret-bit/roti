@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Expense extends Model
+class ExpenseItem extends Model
 {
     protected $guarded = [];
 
@@ -13,8 +13,8 @@ class Expense extends Model
         return $this->belongsTo(ExpenseCategory::class, 'expense_category_id');
     }
 
-    public function item()
+    public function expenses()
     {
-        return $this->belongsTo(ExpenseItem::class, 'expense_item_id');
+        return $this->hasMany(Expense::class);
     }
 }

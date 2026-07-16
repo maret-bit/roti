@@ -8,6 +8,7 @@ import { id as localeId } from "date-fns/locale";
 export default function PengeluaranPage() {
   const [expenses, setExpenses] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  const [expenseItems, setExpenseItems] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   // Filter
@@ -19,6 +20,7 @@ export default function PengeluaranPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     expense_category_id: "",
+    expense_item_id: "",
     amount: "",
     expense_date: format(new Date(), "yyyy-MM-dd"),
     notes: ""
@@ -27,14 +29,16 @@ export default function PengeluaranPage() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [resExpenses, resCategories] = await Promise.all([
+      const [resExpenses, resCategories, resItems] = await Promise.all([
         axios.get("/api/expenses", {
           params: { start_date: startDate, end_date: endDate, category_id: filterCategoryId }
         }),
-        axios.get("/api/expense-categories")
+        axios.get("/api/expense-categories"),
+        axios.get("/api/expense-items")
       ]);
       setExpenses(resExpenses.data);
       setCategories(resCategories.data);
+      setExpenseItems(resItems.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -62,6 +66,7 @@ export default function PengeluaranPage() {
       }
       setFormData({
         expense_category_id: "",
+        expense_item_id: "",
         amount: "",
         expense_date: format(new Date(), "yyyy-MM-dd"),
         notes: ""
@@ -77,6 +82,7 @@ export default function PengeluaranPage() {
     setEditingId(expense.id);
     setFormData({
       expense_category_id: expense.expense_category_id,
+      expense_item_id: expense.expense_item_id || "",
       amount: expense.amount,
       expense_date: expense.expense_date,
       notes: expense.notes || ""
@@ -87,6 +93,7 @@ export default function PengeluaranPage() {
     setEditingId(null);
     setFormData({
       expense_category_id: "",
+      expense_item_id: "",
       amount: "",
       expense_date: format(new Date(), "yyyy-MM-dd"),
       notes: ""
@@ -164,11 +171,26 @@ export default function PengeluaranPage() {
                 required 
                 className="border rounded-lg w-full p-2 bg-white"
                 value={formData.expense_category_id}
-                onChange={e => setFormData({ ...formData, expense_category_id: e.target.value })}
+                onChange={e => {
+                  setFormData({ ...formData, expense_category_id: e.target.value, expense_item_id: "" });
+                }}
               >
                 <option value="">Pilih Kategori</option>
                 {categories.map((c: any) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Item Pengeluaran</label>
+              <select 
+                className="border rounded-lg w-full p-2 bg-white"
+                value={formData.expense_item_id}
+                onChange={e => setFormData({ ...formData, expense_item_id: e.target.value })}
+              >
+                <option value="">(Opsional) Pilih Item</option>
+                {expenseItems.filter((i: any) => i.expense_category_id == formData.expense_category_id).map((i: any) => (
+                  <option key={i.id} value={i.id}>{i.name}</option>
                 ))}
               </select>
             </div>
@@ -227,6 +249,7 @@ export default function PengeluaranPage() {
                 <tr>
                   <th className="px-4 py-3">Tanggal</th>
                   <th className="px-4 py-3">Kategori</th>
+                  <th className="px-4 py-3">Item</th>
                   <th className="px-4 py-3">Catatan</th>
                   <th className="px-4 py-3 text-right">Jumlah</th>
                   <th className="px-4 py-3 text-right">Aksi</th>
@@ -251,6 +274,9 @@ export default function PengeluaranPage() {
                         <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full">
                           {expense.category?.name}
                         </span>
+                      </td>
+                      <td className="px-4 py-3 font-medium text-gray-800">
+                        {expense.item?.name || "-"}
                       </td>
                       <td className="px-4 py-3 text-gray-600">{expense.notes || "-"}</td>
                       <td className="px-4 py-3 text-right font-medium text-red-600">

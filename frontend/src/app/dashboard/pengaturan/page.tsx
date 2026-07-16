@@ -7,8 +7,8 @@ export default function PengaturanPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [conversions, setConversions] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
   const [expenseCategories, setExpenseCategories] = useState<any[]>([]);
+  const [expenseItems, setExpenseItems] = useState<any[]>([]);
   const [units, setUnits] = useState<any[]>([]);
   
   // --- Unit Form ---
@@ -47,6 +47,10 @@ export default function PengaturanPage() {
   const [expenseCategoryName, setExpenseCategoryName] = useState("");
   const [expenseCategoryDescription, setExpenseCategoryDescription] = useState("");
 
+  // --- Expense Item Form ---
+  const [expenseItemName, setExpenseItemName] = useState("");
+  const [expenseItemCategoryId, setExpenseItemCategoryId] = useState("");
+
   // --- Product Form ---
   const [productName, setProductName] = useState("");
   const [productCategoryId, setProductCategoryId] = useState("");
@@ -62,13 +66,14 @@ export default function PengaturanPage() {
 
   const fetchData = async () => {
     try {
-      const [resUsers, resConversions, resProducts, resCategories, resUnits, resExpenseCategories] = await Promise.all([
+      const [resUsers, resConversions, resProducts, resCategories, resUnits, resExpenseCategories, resExpenseItems] = await Promise.all([
         axios.get("/api/users"),
         axios.get("/api/unit-conversions"),
         axios.get("/api/products"),
         axios.get("/api/categories"),
         axios.get("/api/units"),
-        axios.get("/api/expense-categories")
+        axios.get("/api/expense-categories"),
+        axios.get("/api/expense-items")
       ]);
       setUsers(resUsers.data);
       setConversions(resConversions.data);
@@ -76,6 +81,7 @@ export default function PengaturanPage() {
       setCategories(resCategories.data);
       setUnits(resUnits.data);
       setExpenseCategories(resExpenseCategories.data);
+      setExpenseItems(resExpenseItems.data);
     } catch (err) {
       console.error(err);
     }
@@ -201,6 +207,29 @@ export default function PengaturanPage() {
       fetchData();
     } catch (err) {
       alert("Gagal menghapus kategori pengeluaran.");
+    }
+  };
+
+  // --- Handlers Expense Item ---
+  const handleAddExpenseItem = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await axios.post("/api/expense-items", { name: expenseItemName, expense_category_id: expenseItemCategoryId });
+      setExpenseItemName("");
+      setExpenseItemCategoryId("");
+      fetchData();
+    } catch (err) {
+      alert("Gagal menambah item pengeluaran.");
+    }
+  };
+
+  const handleDeleteExpenseItem = async (id: number) => {
+    if (!confirm("Hapus item pengeluaran?")) return;
+    try {
+      await axios.delete(`/api/expense-items/${id}`);
+      fetchData();
+    } catch (err) {
+      alert("Gagal menghapus item pengeluaran.");
     }
   };
 
@@ -367,6 +396,29 @@ export default function PengaturanPage() {
             </div>
           ))}
           {expenseCategories.length === 0 && <p className="text-sm text-gray-500">Belum ada kategori pengeluaran.</p>}
+        </div>
+
+        <div className="mt-8 border-t pt-6">
+          <h2 className="text-lg font-bold mb-4">Master Item Pengeluaran</h2>
+          <form onSubmit={handleAddExpenseItem} className="flex gap-4 mb-6">
+            <input type="text" placeholder="Nama Item (ex: Bayar Listrik Pabrik)" value={expenseItemName} onChange={(e) => setExpenseItemName(e.target.value)} required className="border rounded-lg p-2 flex-1" />
+            <select value={expenseItemCategoryId} onChange={(e) => setExpenseItemCategoryId(e.target.value)} required className="border rounded-lg p-2 bg-white">
+              <option value="">Pilih Kategori</option>
+              {expenseCategories.map((c: any) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+            <button type="submit" className="bg-red-500 text-white rounded-lg px-4 font-medium hover:bg-red-600">Tambah Item</button>
+          </form>
+          <div className="flex flex-wrap gap-2">
+            {expenseItems.map((i: any) => (
+              <div key={i.id} className="bg-orange-50 border border-orange-100 px-3 py-1 rounded-full flex items-center gap-2 text-sm">
+                <span className="font-medium text-orange-700">{i.name} <span className="text-xs text-orange-400">({i.category?.name})</span></span>
+                <button onClick={() => handleDeleteExpenseItem(i.id)} className="text-red-500 font-bold hover:text-red-700">&times;</button>
+              </div>
+            ))}
+            {expenseItems.length === 0 && <p className="text-sm text-gray-500">Belum ada item pengeluaran.</p>}
+          </div>
         </div>
       </div>
 

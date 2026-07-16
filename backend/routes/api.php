@@ -36,6 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('sales-transactions/{id}/pay', [\App\Http\Controllers\SalesTransactionController::class, 'pay']);
     Route::apiResource('sales-transactions', \App\Http\Controllers\SalesTransactionController::class);
     Route::get('/my-stock', [\App\Http\Controllers\SalesTransactionController::class, 'myStock']);
+    Route::post('/my-stock/return', [\App\Http\Controllers\SalesTransactionController::class, 'returnStock']);
 
     Route::apiResource('users', UserController::class);
     Route::apiResource('unit-conversions', UnitConversionController::class);

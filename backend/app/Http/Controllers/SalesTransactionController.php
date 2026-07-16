@@ -204,6 +204,48 @@ class SalesTransactionController extends Controller
         return response()->json($stocks);
     }
 
+    public function returnStock(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|numeric|min:0.01',
+            'notes' => 'nullable|string'
+        ]);
+
+        return DB::transaction(function () use ($request) {
+            $userId = $request->user() ? $request->user()->id : 1;
+            
+            $salesStock = SalesStock::where('user_id', $userId)
+                                    ->where('product_id', $request->product_id)
+                                    ->first();
+
+            if (!$salesStock || $salesStock->quantity < $request->quantity) {
+                return response()->json(['message' => 'Stok yang Anda bawa tidak mencukupi untuk dikembalikan'], 400);
+            }
+
+            // Kurangi stok sales
+            $salesStock->quantity -= $request->quantity;
+            $salesStock->save();
+
+            // Tambah stok gudang utama
+            $product = \App\Models\Product::findOrFail($request->product_id);
+            $product->stock += $request->quantity;
+            $product->save();
+
+            // Log ke inventory_transactions
+            \App\Models\InventoryTransaction::create([
+                'product_id' => $product->id,
+                'type' => 'in',
+                'quantity' => $request->quantity,
+                'reference_type' => 'ReturnFromSales',
+                'reference_id' => clone $userId,
+                'notes' => 'Pengembalian stok dari Sales ' . ($request->user() ? $request->user()->name : $userId) . ($request->notes ? ' - ' . $request->notes : ''),
+            ]);
+
+            return response()->json(['message' => 'Stok berhasil dikembalikan ke gudang utama']);
+        });
+    }
+
     public function salesDashboard(Request $request)
     {
         $userId = $request->user() ? $request->user()->id : 1;

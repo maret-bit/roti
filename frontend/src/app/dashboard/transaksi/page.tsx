@@ -29,6 +29,12 @@ export default function DaftarTransaksiPage() {
   const [returQty, setReturQty] = useState("0");
   const [paidAmount, setPaidAmount] = useState("");
 
+  // Return Stock Modal States
+  const [showReturnModal, setShowReturnModal] = useState(false);
+  const [returnStockItem, setReturnStockItem] = useState<any>(null);
+  const [returnStockQty, setReturnStockQty] = useState("");
+  const [returnNotes, setReturnNotes] = useState("");
+
   const fetchData = async () => {
     try {
       const [resTx, resPartners, resStock, resUser] = await Promise.all([
@@ -165,6 +171,41 @@ export default function DaftarTransaksiPage() {
     }
   };
 
+  const handleOpenReturnModal = (stockItem: any) => {
+    setReturnStockItem(stockItem);
+    setReturnStockQty("");
+    setReturnNotes("");
+    setShowReturnModal(true);
+  };
+
+  const handleCloseReturnModal = () => {
+    setShowReturnModal(false);
+    setReturnStockItem(null);
+  };
+
+  const handleReturnStockSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!returnStockItem) return;
+
+    if (Number(returnStockQty) <= 0 || Number(returnStockQty) > Number(returnStockItem.quantity)) {
+      return alert("Jumlah retur tidak valid. Pastikan tidak melebihi stok yang Anda bawa.");
+    }
+
+    try {
+      await axios.post('/api/my-stock/return', {
+        product_id: returnStockItem.product_id,
+        quantity: returnStockQty,
+        notes: returnNotes
+      });
+      alert("Stok berhasil dikembalikan ke gudang utama.");
+      handleCloseReturnModal();
+      fetchData(); // refresh stock
+    } catch (err: any) {
+      console.error(err);
+      alert(err.response?.data?.message || "Gagal mengembalikan stok.");
+    }
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('id-ID', {
@@ -212,9 +253,19 @@ export default function DaftarTransaksiPage() {
                 <p className="opacity-80 text-sm">Anda belum memiliki stok bawaan. Minta admin melakukan Transfer ke Sales.</p>
               ) : (
                 myStock.map((s: any) => (
-                  <div key={s.id} className="bg-white/20 px-4 py-2 rounded-xl backdrop-blur-sm border border-white/30">
-                    <p className="text-xs opacity-90">{s.product?.name}</p>
-                    <p className="text-xl font-bold">{Number(s.quantity)} <span className="text-sm font-normal">{s.product?.base_unit}</span></p>
+                  <div key={s.id} className="bg-white/20 px-4 py-3 rounded-xl backdrop-blur-sm border border-white/30 flex flex-col justify-between">
+                    <div>
+                      <p className="text-xs opacity-90">{s.product?.name}</p>
+                      <p className="text-xl font-bold">{Number(s.quantity)} <span className="text-sm font-normal">{s.product?.base_unit}</span></p>
+                    </div>
+                    {Number(s.quantity) > 0 && (
+                      <button 
+                        onClick={() => handleOpenReturnModal(s)}
+                        className="mt-2 text-xs bg-white text-orange-600 hover:bg-orange-50 px-3 py-1.5 rounded-lg font-semibold transition-colors w-full"
+                      >
+                        Kembalikan ke Admin
+                      </button>
+                    )}
                   </div>
                 ))
               )}
@@ -549,6 +600,65 @@ export default function DaftarTransaksiPage() {
                   className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium shadow-md shadow-emerald-200 transition-all"
                 >
                   Konfirmasi Lunas
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Return Stock Modal */}
+      {showReturnModal && returnStockItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Kembalikan Stok ke Admin</h2>
+            <div className="mb-4 bg-orange-50 p-3 rounded-lg text-sm space-y-1">
+              <p><span className="text-orange-800 w-24 inline-block">Produk:</span> <strong>{returnStockItem.product?.name}</strong></p>
+              <p><span className="text-orange-800 w-24 inline-block">Sisa di Tangan:</span> <strong>{Number(returnStockItem.quantity)} {returnStockItem.product?.base_unit}</strong></p>
+            </div>
+
+            <form onSubmit={handleReturnStockSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Jumlah yang Dikembalikan</label>
+                <div className="flex items-center space-x-2">
+                  <input 
+                    type="number" 
+                    min="0.01"
+                    max={Number(returnStockItem.quantity)}
+                    step="0.01"
+                    value={returnStockQty}
+                    onChange={e => setReturnStockQty(e.target.value)}
+                    required
+                    className="w-full border-gray-300 rounded-lg shadow-sm focus:border-orange-500 focus:ring-orange-500 p-2.5 border"
+                  />
+                  <span className="text-gray-500 font-medium">{returnStockItem.product?.base_unit}</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Catatan (Opsional)</label>
+                <textarea 
+                  rows={2}
+                  value={returnNotes}
+                  onChange={e => setReturnNotes(e.target.value)}
+                  placeholder="Misal: Barang sisa ditarik admin"
+                  className="w-full border-gray-300 rounded-lg shadow-sm focus:border-orange-500 focus:ring-orange-500 p-2.5 border"
+                ></textarea>
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4 border-t border-gray-100 mt-6">
+                <button 
+                  type="button" 
+                  onClick={handleCloseReturnModal}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+                >
+                  Batal
+                </button>
+                <button 
+                  type="submit"
+                  className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 font-medium shadow-md shadow-orange-200 transition-all"
+                >
+                  Proses Pengembalian
                 </button>
               </div>
             </form>

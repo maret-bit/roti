@@ -12,6 +12,8 @@ export default function DaftarTransaksiPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [filterStatus, setFilterStatus] = useState("all");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   // Form states
   const [partnerId, setPartnerId] = useState("");
@@ -178,8 +180,23 @@ export default function DaftarTransaksiPage() {
   const amountToPay = payTransaction ? (Number(payTransaction.quantity) - Number(returQty)) * Number(payTransaction.price) : 0;
 
   const filteredTransactions = transactions.filter(t => {
-    if (filterStatus === 'paid') return t.status === 'paid';
-    if (filterStatus === 'unpaid') return t.status !== 'paid';
+    if (filterStatus === 'paid' && t.status !== 'paid') return false;
+    if (filterStatus === 'unpaid' && t.status === 'paid') return false;
+    
+    if (startDate || endDate) {
+      const txDate = new Date(t.created_at);
+      if (startDate) {
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+        if (txDate < start) return false;
+      }
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        if (txDate > end) return false;
+      }
+    }
+    
     return true;
   });
 
@@ -342,7 +359,22 @@ export default function DaftarTransaksiPage() {
               <h2 className="text-xl font-bold text-gray-800">Daftar Transaksi Sales</h2>
               <p className="text-sm text-gray-500 mt-1">Riwayat penitipan dan penjualan produk ke partner.</p>
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center space-x-2">
+                <input 
+                  type="date"
+                  value={startDate}
+                  onChange={e => setStartDate(e.target.value)}
+                  className="border-gray-300 rounded-xl shadow-sm focus:border-orange-500 focus:ring-orange-500 p-2 text-sm border bg-white"
+                />
+                <span className="text-gray-500 text-sm">s/d</span>
+                <input 
+                  type="date"
+                  value={endDate}
+                  onChange={e => setEndDate(e.target.value)}
+                  className="border-gray-300 rounded-xl shadow-sm focus:border-orange-500 focus:ring-orange-500 p-2 text-sm border bg-white"
+                />
+              </div>
               <select 
                 value={filterStatus}
                 onChange={e => setFilterStatus(e.target.value)}

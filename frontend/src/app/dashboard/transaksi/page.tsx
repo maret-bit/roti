@@ -12,6 +12,7 @@ export default function DaftarTransaksiPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [filterStatus, setFilterStatus] = useState("all");
+  const [filterSales, setFilterSales] = useState("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -220,9 +221,12 @@ export default function DaftarTransaksiPage() {
 
   const amountToPay = payTransaction ? (Number(payTransaction.quantity) - Number(returQty)) * Number(payTransaction.price) : 0;
 
+  const uniqueSales = Array.from(new Set(transactions.map(t => t.user?.name).filter(Boolean)));
+
   const filteredTransactions = transactions.filter(t => {
     if (filterStatus === 'paid' && t.status !== 'paid') return false;
     if (filterStatus === 'unpaid' && t.status === 'paid') return false;
+    if (filterSales !== 'all' && t.user?.name !== filterSales) return false;
     
     if (startDate || endDate) {
       const txDate = new Date(t.created_at);
@@ -435,6 +439,18 @@ export default function DaftarTransaksiPage() {
                 <option value="unpaid">Belum Bayar</option>
                 <option value="paid">Lunas</option>
               </select>
+              {user?.role === "admin" && (
+                <select 
+                  value={filterSales}
+                  onChange={e => setFilterSales(e.target.value)}
+                  className="border-gray-300 rounded-xl shadow-sm focus:border-orange-500 focus:ring-orange-500 p-2 text-sm border bg-white"
+                >
+                  <option value="all">Semua Sales</option>
+                  {uniqueSales.map((salesName: any, idx: number) => (
+                    <option key={idx} value={salesName}>{salesName}</option>
+                  ))}
+                </select>
+              )}
               {user?.role === "user_sales" && (
                 <button 
                   onClick={() => handleOpenForm()}

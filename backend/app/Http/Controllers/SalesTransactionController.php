@@ -238,7 +238,7 @@ class SalesTransactionController extends Controller
                 'type' => 'in',
                 'quantity' => $request->quantity,
                 'reference_type' => 'ReturnFromSales',
-                'reference_id' => clone $userId,
+                'reference_id' => $userId,
                 'notes' => 'Pengembalian stok dari Sales ' . ($request->user() ? $request->user()->name : $userId) . ($request->notes ? ' - ' . $request->notes : ''),
             ]);
 

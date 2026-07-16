@@ -478,6 +478,7 @@ export default function HasilProduksiPage() {
                   <thead className="bg-gray-50 text-gray-700 font-semibold uppercase">
                     <tr>
                       <th className="px-4 py-3 rounded-tl-lg">Waktu</th>
+                      <th className="px-4 py-3">Nama Sales</th>
                       <th className="px-4 py-3">Produk</th>
                       <th className="px-4 py-3">Qty Dikembalikan</th>
                       <th className="px-4 py-3 rounded-tr-lg">Catatan</th>
@@ -486,7 +487,7 @@ export default function HasilProduksiPage() {
                   <tbody>
                     {returns.length === 0 ? (
                       <tr>
-                        <td colSpan={4} className="text-center py-8 text-gray-500">
+                        <td colSpan={5} className="text-center py-8 text-gray-500">
                           Belum ada riwayat pengembalian stok dari sales.
                         </td>
                       </tr>
@@ -495,6 +496,9 @@ export default function HasilProduksiPage() {
                         <tr key={item.id} className="border-b last:border-0 hover:bg-orange-50/30 transition-colors">
                           <td className="px-4 py-4 text-gray-600">
                             {formatDate(item.created_at)}
+                          </td>
+                          <td className="px-4 py-4 font-semibold text-gray-800">
+                            {item.return_user?.name || '-'}
                           </td>
                           <td className="px-4 py-4 font-medium text-gray-700">
                             {item.product?.name}

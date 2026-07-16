@@ -9,4 +9,8 @@ class InventoryTransaction extends Model
     public function product() {
         return $this->belongsTo(Product::class);
     }
+
+    public function returnUser() {
+        return $this->belongsTo(User::class, 'reference_id');
+    }
 }

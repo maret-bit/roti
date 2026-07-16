@@ -248,7 +248,7 @@ class SalesTransactionController extends Controller
 
     public function returnHistory()
     {
-        $returns = \App\Models\InventoryTransaction::with('product')
+        $returns = \App\Models\InventoryTransaction::with(['product', 'returnUser'])
             ->where('reference_type', 'ReturnFromSales')
             ->orderBy('created_at', 'desc')
             ->get();

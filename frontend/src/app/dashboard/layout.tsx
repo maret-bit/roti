@@ -55,6 +55,7 @@ export default function DashboardLayout({
       { name: "Pembelian", path: "/dashboard/pembelian", icon: "🛒" },
       { name: "Resep (BOM)", path: "/dashboard/resep", icon: "📖" },
       { name: "Hasil Produksi", path: "/dashboard/hasil-produksi", icon: "🥖" },
+      { name: "Pengeluaran", path: "/dashboard/pengeluaran", icon: "💸" },
       { name: "Daftar Transaksi", path: "/dashboard/transaksi", icon: "📝" },
     ];
   }

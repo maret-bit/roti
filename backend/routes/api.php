@@ -11,6 +11,8 @@ use App\Http\Controllers\UnitConversionController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UnitController;
+use App\Http\Controllers\ExpenseCategoryController;
+use App\Http\Controllers\ExpenseController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -45,4 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('products', ProductController::class);
     Route::apiResource('units', UnitController::class);
     Route::apiResource('recipes', \App\Http\Controllers\RecipeController::class);
+
+    Route::apiResource('expense-categories', ExpenseCategoryController::class);
+    Route::apiResource('expenses', ExpenseController::class);
 });

@@ -8,6 +8,7 @@ export default function PengaturanPage() {
   const [conversions, setConversions] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  const [expenseCategories, setExpenseCategories] = useState<any[]>([]);
   const [units, setUnits] = useState<any[]>([]);
   
   // --- Unit Form ---
@@ -42,6 +43,10 @@ export default function PengaturanPage() {
   // --- Category Form ---
   const [categoryName, setCategoryName] = useState("");
 
+  // --- Expense Category Form ---
+  const [expenseCategoryName, setExpenseCategoryName] = useState("");
+  const [expenseCategoryDescription, setExpenseCategoryDescription] = useState("");
+
   // --- Product Form ---
   const [productName, setProductName] = useState("");
   const [productCategoryId, setProductCategoryId] = useState("");
@@ -57,18 +62,20 @@ export default function PengaturanPage() {
 
   const fetchData = async () => {
     try {
-      const [resUsers, resConversions, resProducts, resCategories, resUnits] = await Promise.all([
+      const [resUsers, resConversions, resProducts, resCategories, resUnits, resExpenseCategories] = await Promise.all([
         axios.get("/api/users"),
         axios.get("/api/unit-conversions"),
         axios.get("/api/products"),
         axios.get("/api/categories"),
-        axios.get("/api/units")
+        axios.get("/api/units"),
+        axios.get("/api/expense-categories")
       ]);
       setUsers(resUsers.data);
       setConversions(resConversions.data);
       setProducts(resProducts.data);
       setCategories(resCategories.data);
       setUnits(resUnits.data);
+      setExpenseCategories(resExpenseCategories.data);
     } catch (err) {
       console.error(err);
     }
@@ -171,6 +178,29 @@ export default function PengaturanPage() {
       fetchData();
     } catch (err) {
       alert("Gagal menghapus kategori.");
+    }
+  };
+
+  // --- Handlers Expense Kategori ---
+  const handleAddExpenseCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await axios.post("/api/expense-categories", { name: expenseCategoryName, description: expenseCategoryDescription });
+      setExpenseCategoryName("");
+      setExpenseCategoryDescription("");
+      fetchData();
+    } catch (err) {
+      alert("Gagal menambah kategori pengeluaran.");
+    }
+  };
+
+  const handleDeleteExpenseCategory = async (id: number) => {
+    if (!confirm("Hapus kategori pengeluaran? Ini mungkin gagal jika sudah ada pengeluaran di kategori ini.")) return;
+    try {
+      await axios.delete(`/api/expense-categories/${id}`);
+      fetchData();
+    } catch (err) {
+      alert("Gagal menghapus kategori pengeluaran.");
     }
   };
 
@@ -318,6 +348,25 @@ export default function PengaturanPage() {
             </div>
           ))}
           {categories.length === 0 && <p className="text-sm text-gray-500">Belum ada kategori.</p>}
+        </div>
+      </div>
+
+      {/* Kategori Pengeluaran */}
+      <div className="bg-white rounded-2xl shadow-sm p-6 border-l-4 border-red-500">
+        <h2 className="text-xl font-bold mb-4">Master Kategori Pengeluaran</h2>
+        <form onSubmit={handleAddExpenseCategory} className="flex gap-4 mb-6">
+          <input type="text" placeholder="Nama Kategori (ex: Listrik, Transport)" value={expenseCategoryName} onChange={(e) => setExpenseCategoryName(e.target.value)} required className="border rounded-lg p-2 flex-1" />
+          <input type="text" placeholder="Deskripsi (Opsional)" value={expenseCategoryDescription} onChange={(e) => setExpenseCategoryDescription(e.target.value)} className="border rounded-lg p-2 flex-1" />
+          <button type="submit" className="bg-red-600 text-white rounded-lg px-4 font-medium hover:bg-red-700">Tambah Kategori</button>
+        </form>
+        <div className="flex flex-wrap gap-2">
+          {expenseCategories.map((c: any) => (
+            <div key={c.id} className="bg-red-50 border border-red-100 px-3 py-1 rounded-full flex items-center gap-2 text-sm">
+              <span className="font-medium text-red-700" title={c.description}>{c.name}</span>
+              <button onClick={() => handleDeleteExpenseCategory(c.id)} className="text-red-500 font-bold hover:text-red-700">&times;</button>
+            </div>
+          ))}
+          {expenseCategories.length === 0 && <p className="text-sm text-gray-500">Belum ada kategori pengeluaran.</p>}
         </div>
       </div>
 

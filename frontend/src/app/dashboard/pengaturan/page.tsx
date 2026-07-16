@@ -7,6 +7,7 @@ export default function PengaturanPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [conversions, setConversions] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [expenseCategories, setExpenseCategories] = useState<any[]>([]);
   const [expenseItems, setExpenseItems] = useState<any[]>([]);
   const [units, setUnits] = useState<any[]>([]);

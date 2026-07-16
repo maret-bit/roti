@@ -11,6 +11,7 @@ export default function DaftarTransaksiPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [filterStatus, setFilterStatus] = useState("all");
 
   // Form states
   const [partnerId, setPartnerId] = useState("");
@@ -176,6 +177,12 @@ export default function DaftarTransaksiPage() {
 
   const amountToPay = payTransaction ? (Number(payTransaction.quantity) - Number(returQty)) * Number(payTransaction.price) : 0;
 
+  const filteredTransactions = transactions.filter(t => {
+    if (filterStatus === 'paid') return t.status === 'paid';
+    if (filterStatus === 'unpaid') return t.status !== 'paid';
+    return true;
+  });
+
   return (
     <div className="space-y-6">
       {/* Sisa Stok Bawaan (Hanya untuk Sales, kecuali Admin sedang edit) */}
@@ -335,14 +342,25 @@ export default function DaftarTransaksiPage() {
               <h2 className="text-xl font-bold text-gray-800">Daftar Transaksi Sales</h2>
               <p className="text-sm text-gray-500 mt-1">Riwayat penitipan dan penjualan produk ke partner.</p>
             </div>
-            {user?.role === "user_sales" && (
-              <button 
-                onClick={() => handleOpenForm()}
-                className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors shadow-sm"
+            <div className="flex items-center space-x-3">
+              <select 
+                value={filterStatus}
+                onChange={e => setFilterStatus(e.target.value)}
+                className="border-gray-300 rounded-xl shadow-sm focus:border-orange-500 focus:ring-orange-500 p-2 text-sm border bg-white"
               >
-                + Buat Transaksi
-              </button>
-            )}
+                <option value="all">Semua Status</option>
+                <option value="unpaid">Belum Bayar</option>
+                <option value="paid">Lunas</option>
+              </select>
+              {user?.role === "user_sales" && (
+                <button 
+                  onClick={() => handleOpenForm()}
+                  className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors shadow-sm whitespace-nowrap"
+                >
+                  + Buat Transaksi
+                </button>
+              )}
+            </div>
           </div>
 
           {loading ? (
@@ -364,14 +382,14 @@ export default function DaftarTransaksiPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {transactions.length === 0 ? (
+                  {filteredTransactions.length === 0 ? (
                     <tr>
                       <td colSpan={8} className="text-center py-8 text-gray-500">
                         Belum ada riwayat transaksi.
                       </td>
                     </tr>
                   ) : (
-                    transactions.map((t: any) => (
+                    filteredTransactions.map((t: any) => (
                       <tr key={t.id} className="hover:bg-orange-50/30 transition-colors">
                         <td className="px-4 py-4 text-gray-600 whitespace-nowrap">
                           {formatDate(t.created_at)}

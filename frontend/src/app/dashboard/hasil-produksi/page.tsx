@@ -6,6 +6,7 @@ import axios from "@/lib/axios";
 export default function HasilProduksiPage() {
   const [results, setResults] = useState<any[]>([]);
   const [transfers, setTransfers] = useState<any[]>([]);
+  const [returns, setReturns] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [salesUsers, setSalesUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,15 +26,17 @@ export default function HasilProduksiPage() {
 
   const fetchData = async () => {
     try {
-      const [resResults, resProducts, resUsers, resTransfers] = await Promise.all([
+      const [resResults, resProducts, resUsers, resTransfers, resReturns] = await Promise.all([
         axios.get("/api/production/results"),
         axios.get("/api/products"),
         axios.get("/api/users"),
-        axios.get("/api/transfers")
+        axios.get("/api/transfers"),
+        axios.get("/api/returns")
       ]);
       setResults(resResults.data);
       setProducts(resProducts.data);
       setTransfers(resTransfers.data);
+      setReturns(resReturns.data);
       setSalesUsers(resUsers.data.filter((u: any) => u.role === "user_sales"));
     } catch (err) {
       console.error(err);
@@ -448,6 +451,59 @@ export default function HasilProduksiPage() {
                           </td>
                           <td className="px-4 py-4 text-right">
                             <button onClick={() => handleDeleteTransfer(item.id)} className="text-red-500 hover:text-red-700 font-medium">Batalkan</button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* List Pengembalian dari Sales */}
+          <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 mt-2">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-gray-800">Riwayat Pengembalian dari Sales</h2>
+                <p className="text-sm text-gray-500 mt-1">Stok sisa yang dikembalikan sales ke gudang utama.</p>
+              </div>
+            </div>
+
+            {loading ? (
+              <p className="text-gray-500">Memuat data pengembalian...</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead className="bg-gray-50 text-gray-700 font-semibold uppercase">
+                    <tr>
+                      <th className="px-4 py-3 rounded-tl-lg">Waktu</th>
+                      <th className="px-4 py-3">Produk</th>
+                      <th className="px-4 py-3">Qty Dikembalikan</th>
+                      <th className="px-4 py-3 rounded-tr-lg">Catatan</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {returns.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} className="text-center py-8 text-gray-500">
+                          Belum ada riwayat pengembalian stok dari sales.
+                        </td>
+                      </tr>
+                    ) : (
+                      returns.map((item: any) => (
+                        <tr key={item.id} className="border-b last:border-0 hover:bg-orange-50/30 transition-colors">
+                          <td className="px-4 py-4 text-gray-600">
+                            {formatDate(item.created_at)}
+                          </td>
+                          <td className="px-4 py-4 font-medium text-gray-700">
+                            {item.product?.name}
+                          </td>
+                          <td className="px-4 py-4 font-bold text-orange-600">
+                            {Number(item.quantity)} {item.product?.base_unit}
+                          </td>
+                          <td className="px-4 py-4 text-gray-600">
+                            {item.notes || '-'}
                           </td>
                         </tr>
                       ))

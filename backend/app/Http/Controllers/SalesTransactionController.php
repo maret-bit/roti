@@ -246,6 +246,15 @@ class SalesTransactionController extends Controller
         });
     }
 
+    public function returnHistory()
+    {
+        $returns = \App\Models\InventoryTransaction::with('product')
+            ->where('reference_type', 'ReturnFromSales')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        return response()->json($returns);
+    }
+
     public function salesDashboard(Request $request)
     {
         $userId = $request->user() ? $request->user()->id : 1;

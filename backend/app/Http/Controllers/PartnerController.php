@@ -7,8 +7,12 @@ use Illuminate\Http\Request;
 
 class PartnerController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $user = $request->user();
+        if ($user && $user->role === 'user_sales') {
+            return response()->json(Partner::where('user_id', $user->id)->orderBy('created_at', 'desc')->get());
+        }
         return response()->json(Partner::orderBy('created_at', 'desc')->get());
     }
 
@@ -20,7 +24,9 @@ class PartnerController extends Controller
             'phone' => 'nullable|string|max:20',
         ]);
 
-        $partner = Partner::create($request->only('name', 'location', 'phone'));
+        $data = $request->only('name', 'location', 'phone');
+        $data['user_id'] = $request->user()->id ?? null;
+        $partner = Partner::create($data);
         return response()->json($partner, 201);
     }
 

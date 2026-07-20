@@ -209,6 +209,11 @@ export default function DaftarTransaksiPage() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
+    if (user?.role === "user_sales") {
+      return new Intl.DateTimeFormat('id-ID', {
+        day: '2-digit', month: 'short', year: 'numeric'
+      }).format(date);
+    }
     return new Intl.DateTimeFormat('id-ID', {
       day: '2-digit', month: 'short', year: 'numeric',
       hour: '2-digit', minute: '2-digit'
@@ -470,14 +475,15 @@ export default function DaftarTransaksiPage() {
                 <thead className="bg-gray-50 text-gray-700 font-semibold uppercase">
                   <tr>
                     <th className="px-4 py-3 rounded-tl-lg">Waktu</th>
-                    <th className="px-4 py-3">Sales</th>
+                    {user?.role === "user_sales" && <th className="px-4 py-3">Aksi</th>}
+                    {user?.role !== "user_sales" && <th className="px-4 py-3">Sales</th>}
                     <th className="px-4 py-3">Partner</th>
-                    <th className="px-4 py-3">Produk</th>
+                    {user?.role !== "user_sales" && <th className="px-4 py-3">Produk</th>}
                     <th className="px-4 py-3">Tipe</th>
                     <th className="px-4 py-3">Qty</th>
                     <th className="px-4 py-3">Total Harga</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3 text-right rounded-tr-lg">Aksi</th>
+                    <th className={`px-4 py-3 ${user?.role === "user_sales" ? "rounded-tr-lg" : ""}`}>Status</th>
+                    {user?.role !== "user_sales" && <th className="px-4 py-3 text-right rounded-tr-lg">Aksi</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -493,15 +499,41 @@ export default function DaftarTransaksiPage() {
                         <td className="px-4 py-4 text-gray-600 whitespace-nowrap">
                           {formatDate(t.created_at)}
                         </td>
-                        <td className="px-4 py-4 text-gray-800">
-                          {t.user?.name}
-                        </td>
+                        {user?.role === "user_sales" && (
+                          <td className="px-4 py-4 space-x-2 whitespace-nowrap">
+                            {t.status !== 'paid' && (
+                              <>
+                                <button 
+                                  onClick={() => handleOpenPayModal(t)}
+                                  className="text-emerald-600 hover:text-emerald-800"
+                                  title="Bayar"
+                                >
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                                </button>
+                                <button 
+                                  onClick={() => handleDelete(t.id)} 
+                                  className="text-red-500 hover:text-red-700"
+                                  title="Batalkan"
+                                >
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </button>
+                              </>
+                            )}
+                          </td>
+                        )}
+                        {user?.role !== "user_sales" && (
+                          <td className="px-4 py-4 text-gray-800">
+                            {t.user?.name}
+                          </td>
+                        )}
                         <td className="px-4 py-4 font-semibold text-gray-800">
                           {t.partner?.name}
                         </td>
-                        <td className="px-4 py-4 font-medium text-gray-700">
-                          {t.product?.name}
-                        </td>
+                        {user?.role !== "user_sales" && (
+                          <td className="px-4 py-4 font-medium text-gray-700">
+                            {t.product?.name}
+                          </td>
+                        )}
                         <td className="px-4 py-4">
                           <span className={`px-2 py-1 text-xs font-semibold rounded-full ${t.type === 'jual' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
                             {t.type === 'jual' ? 'JUAL PUTUS' : 'TITIP'}
@@ -518,32 +550,18 @@ export default function DaftarTransaksiPage() {
                             {t.status === 'paid' ? 'LUNAS' : 'BELUM BAYAR'}
                           </span>
                         </td>
-                        <td className="px-4 py-4 text-right space-x-3 whitespace-nowrap">
-                          {user?.role === "user_sales" && t.status !== 'paid' && (
-                            <button 
-                              onClick={() => handleOpenPayModal(t)}
-                              className="text-emerald-600 hover:text-emerald-800 font-medium"
-                            >
-                              Bayar
-                            </button>
-                          )}
-                          {user?.role === "user_sales" && t.status !== 'paid' && (
-                            <button 
-                              onClick={() => handleDelete(t.id)} 
-                              className="text-red-500 hover:text-red-700 font-medium"
-                            >
-                              Batalkan
-                            </button>
-                          )}
-                          {user?.role === "admin" && (
-                            <button 
-                              onClick={() => handleEdit(t)} 
-                              className="text-blue-600 hover:text-blue-800 font-medium"
-                            >
-                              Edit
-                            </button>
-                          )}
-                        </td>
+                        {user?.role !== "user_sales" && (
+                          <td className="px-4 py-4 text-right space-x-3 whitespace-nowrap">
+                            {user?.role === "admin" && (
+                              <button 
+                                onClick={() => handleEdit(t)} 
+                                className="text-blue-600 hover:text-blue-800 font-medium"
+                              >
+                                Edit
+                              </button>
+                            )}
+                          </td>
+                        )}
                       </tr>
                     ))
                   )}

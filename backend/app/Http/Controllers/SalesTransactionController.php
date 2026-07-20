@@ -56,6 +56,8 @@ class SalesTransactionController extends Controller
                 'quantity' => $request->quantity,
                 'price' => $request->price,
                 'total_price' => $request->quantity * $request->price,
+                'status' => $request->type === 'jual' ? 'paid' : 'pending',
+                'paid_amount' => $request->type === 'jual' ? $request->quantity * $request->price : 0,
                 'notes' => $request->notes,
             ]);
 

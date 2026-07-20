@@ -21,10 +21,16 @@ export default function PartnerPage() {
   const [location, setLocation] = useState("");
   const [phone, setPhone] = useState("");
 
+  const [user, setUser] = useState<any>(null);
+
   const fetchPartners = async () => {
     try {
-      const res = await axios.get("/api/partners");
-      setPartners(res.data);
+      const [resPartners, resUser] = await Promise.all([
+        axios.get("/api/partners"),
+        axios.get("/api/user")
+      ]);
+      setPartners(resPartners.data);
+      setUser(resUser.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -239,8 +245,8 @@ export default function PartnerPage() {
                 <thead className="bg-gray-50 text-gray-700 font-semibold uppercase">
                   <tr>
                     <th className="px-4 py-3 rounded-tl-lg">Nama Partner / Toko</th>
-                    <th className="px-4 py-3">Lokasi / Alamat</th>
-                    <th className="px-4 py-3">Nomor HP</th>
+                    {user?.role !== "user_sales" && <th className="px-4 py-3">Lokasi / Alamat</th>}
+                    {user?.role !== "user_sales" && <th className="px-4 py-3">Nomor HP</th>}
                     <th className="px-4 py-3 text-right rounded-tr-lg">Aksi</th>
                   </tr>
                 </thead>
@@ -257,30 +263,43 @@ export default function PartnerPage() {
                         <td className="px-4 py-4 font-semibold text-gray-800">
                           {p.name}
                         </td>
-                        <td className="px-4 py-4 text-gray-600">
-                          {p.location || '-'}
-                        </td>
-                        <td className="px-4 py-4 text-gray-600">
-                          {p.phone || '-'}
-                        </td>
+                        {user?.role !== "user_sales" && (
+                          <td className="px-4 py-4 text-gray-600">
+                            {p.location || '-'}
+                          </td>
+                        )}
+                        {user?.role !== "user_sales" && (
+                          <td className="px-4 py-4 text-gray-600">
+                            {p.phone || '-'}
+                          </td>
+                        )}
                         <td className="px-4 py-4 text-right space-x-3">
                           <button 
                             onClick={() => handleOpenPayment(p)} 
                             className="text-emerald-600 hover:text-emerald-800 font-medium"
+                            title="Bayar"
                           >
-                            Bayar
+                            {user?.role === "user_sales" ? (
+                              <svg className="w-5 h-5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                            ) : "Bayar"}
                           </button>
                           <button 
                             onClick={() => handleOpenForm(p)} 
                             className="text-blue-600 hover:text-blue-800 font-medium"
+                            title="Edit"
                           >
-                            Edit
+                            {user?.role === "user_sales" ? (
+                              <svg className="w-5 h-5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                            ) : "Edit"}
                           </button>
                           <button 
                             onClick={() => handleDelete(p.id)} 
                             className="text-red-500 hover:text-red-700 font-medium"
+                            title="Hapus"
                           >
-                            Hapus
+                            {user?.role === "user_sales" ? (
+                              <svg className="w-5 h-5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            ) : "Hapus"}
                           </button>
                         </td>
                       </tr>
